@@ -6,12 +6,15 @@ import { money } from '@/lib/format';
 import { Button, ErrorState, Loading } from '@/components/ui';
 import type { RootStackParamList } from '@/navigation';
 import type { ApiError } from '@/types/api';
+import { useSession } from '@/session/session';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Products'>;
 
 export function ProductsScreen({ navigation }: Props) {
   const [search, setSearch] = useState('');
   const { data, isLoading, isError, error, refetch, isFetching } = useProducts({ search });
+  const { signOut } = useSession();
+
 
   return (
     <View style={styles.container}>
@@ -25,6 +28,7 @@ export function ProductsScreen({ navigation }: Props) {
         />
         <Button label="Pedidos" variant="ghost" onPress={() => navigation.navigate('Orders')} />
         <Button label="Carrinho" variant="ghost" onPress={() => navigation.navigate('Cart')} />
+        <Button label="Voltar" variant="ghost" onPress={signOut}/>
       </View>
 
       {isLoading ? (
