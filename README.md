@@ -5,7 +5,7 @@
 membros:
 Pietro Paranhos Wilhelm - rm561378
 
-EXPO_KEY: sk_live_c202a01d1a82d91b3dcf4c77465010f3da10e83092996e04
+EXPO_KEY:
 
 ## Sobre a Loja 
 
