@@ -34,7 +34,7 @@ export function SignInScreen({ navigation }: Props) {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <Text style={styles.title}>Loja da Turma</Text>
+      <Text style={styles.title}>Dr.Mouse</Text>
       <Text style={styles.subtitle}>Entre com sua conta de cliente.</Text>
 
       <View style={styles.form}>

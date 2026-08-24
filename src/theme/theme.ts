@@ -1,6 +1,6 @@
 export const defaultTheme = {
-  primary: '#22c55e',
-  storeName: 'Loja da Turma',
+  primary: '#7e17d3',
+  storeName: 'Dr.Mouse',
   logoUrl: null as string | null,
 };
 

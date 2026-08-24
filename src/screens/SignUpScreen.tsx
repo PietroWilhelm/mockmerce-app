@@ -36,7 +36,7 @@ export function SignUpScreen({ navigation }: Props) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <Text style={styles.title}>Criar conta</Text>
-      <Text style={styles.subtitle}>Cadastre-se para comprar na Loja da Turma.</Text>
+      <Text style={styles.subtitle}>Cadastre-se para comprar na Dr.Mouse</Text>
 
       <View style={styles.form}>
         <TextInput style={styles.input} placeholder="Nome" value={name} onChangeText={setName} autoCorrect={false} />
