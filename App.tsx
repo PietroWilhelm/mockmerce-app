@@ -7,6 +7,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { queryClient } from '@/lib/queryClient';
 import { SessionProvider, useSession } from '@/session/session';
 import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
+import { Loading } from '@/components/ui';
 import { SignInScreen } from '@/screens/SignInScreen';
 import { SignUpScreen } from '@/screens/SignUpScreen';
 import { ForgotPasswordScreen } from '@/screens/ForgotPasswordScreen';
@@ -50,7 +51,8 @@ function AppFlow() {
 }
 
 function RootNavigator() {
-  const { isLoggedIn } = useSession();
+  const { isLoggedIn, isBooting } = useSession();
+  if (isBooting) return <Loading label="Restaurando sessão…" />;
   return isLoggedIn ? <AppFlow /> : <AuthFlow />;
 }
 
