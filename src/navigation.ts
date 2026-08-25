@@ -11,4 +11,5 @@ export type RootStackParamList = {
   Checkout: { shippingMethod?: string; shippingPrice?: number } | undefined;
   Orders: undefined;
   Order: { id: string };
+  Favorites: undefined;
 };

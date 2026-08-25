@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { FlatList, Image, Pressable, RefreshControl, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, Text, TextInput, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useProducts } from '@/hooks/useProducts';
-import { money } from '@/lib/format';
-import { Button, ErrorState, Loading } from '@/components/ui';
+import { ProductCard } from '@/components/ProductCard';
+import { ErrorState, Loading } from '@/components/ui';
+import { useTheme } from '@/theme/ThemeProvider';
 import type { RootStackParamList } from '@/navigation';
 import type { ApiError } from '@/types/api';
 import { useSession } from '@/session/session';
@@ -14,21 +15,36 @@ export function ProductsScreen({ navigation }: Props) {
   const [search, setSearch] = useState('');
   const { data, isLoading, isError, error, refetch, isFetching } = useProducts({ search });
   const { signOut } = useSession();
-
+  const theme = useTheme();
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.hero, { backgroundColor: theme.primary }]}>
+        <View style={styles.heroTop}>
+          <Text style={styles.heroTitle}>{theme.storeName}</Text>
+          <Text style={styles.heroLink} onPress={signOut}>
+            Sair
+          </Text>
+        </View>
         <TextInput
           style={styles.search}
           placeholder="Buscar produto…"
+          placeholderTextColor="#9ca3af"
           value={search}
           onChangeText={setSearch}
           autoCorrect={false}
         />
-        <Button label="Pedidos" variant="ghost" onPress={() => navigation.navigate('Orders')} />
-        <Button label="Carrinho" variant="ghost" onPress={() => navigation.navigate('Cart')} />
-        <Button label="Voltar" variant="ghost" onPress={signOut}/>
+        <View style={styles.tabs}>
+          <Text style={styles.tab} onPress={() => navigation.navigate('Favorites')}>
+            ★ Favoritos
+          </Text>
+          <Text style={styles.tab} onPress={() => navigation.navigate('Orders')}>
+            Pedidos
+          </Text>
+          <Text style={styles.tab} onPress={() => navigation.navigate('Cart')}>
+            Carrinho
+          </Text>
+        </View>
       </View>
 
       {isLoading ? (
@@ -43,27 +59,10 @@ export function ProductsScreen({ navigation }: Props) {
           refreshControl={<RefreshControl refreshing={isFetching && !isLoading} onRefresh={() => refetch()} />}
           ListEmptyComponent={<Text style={styles.empty}>Nenhum produto encontrado.</Text>}
           renderItem={({ item }) => (
-            <Pressable
-              style={styles.card}
+            <ProductCard
+              product={item}
               onPress={() => navigation.navigate('ProductDetail', { id: item.id, name: item.name })}
-            >
-              {item.image ? (
-                <Image source={{ uri: item.image }} style={styles.thumb} />
-              ) : (
-                <View style={[styles.thumb, styles.thumbEmpty]} />
-              )}
-              <View style={styles.cardBody}>
-                <Text style={styles.name} numberOfLines={2}>
-                  {item.name}
-                </Text>
-                {item.brand && <Text style={styles.brand}>{item.brand}</Text>}
-                <Text style={styles.price}>
-                  {item.priceFrom === item.priceTo
-                    ? money(item.priceFrom)
-                    : `${money(item.priceFrom)} – ${money(item.priceTo)}`}
-                </Text>
-              </View>
-            </Pressable>
+            />
           )}
         />
       )}
@@ -73,22 +72,19 @@ export function ProductsScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
-  header: { flexDirection: 'row', gap: 8, padding: 12, alignItems: 'center' },
+  hero: { paddingTop: 8, paddingHorizontal: 16, paddingBottom: 16, gap: 12, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
+  heroTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  heroTitle: { fontSize: 20, fontWeight: '800', color: '#fff' },
+  heroLink: { fontSize: 13, fontWeight: '600', color: 'rgba(255,255,255,0.85)' },
   search: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    fontSize: 15,
   },
-  list: { paddingHorizontal: 12, paddingBottom: 24, gap: 10 },
-  card: { flexDirection: 'row', gap: 12, backgroundColor: '#f9fafb', borderRadius: 12, padding: 10 },
-  thumb: { width: 72, height: 72, borderRadius: 8, backgroundColor: '#e5e7eb' },
-  thumbEmpty: { alignItems: 'center', justifyContent: 'center' },
-  cardBody: { flex: 1, justifyContent: 'center', gap: 2 },
-  name: { fontSize: 15, fontWeight: '600', color: '#111827' },
-  brand: { fontSize: 12, color: '#6b7280' },
-  price: { fontSize: 15, fontWeight: '700', color: '#111827', marginTop: 2 },
+  tabs: { flexDirection: 'row', gap: 18 },
+  tab: { fontSize: 13, fontWeight: '700', color: 'rgba(255,255,255,0.85)' },
+  list: { padding: 12, gap: 10 },
   empty: { textAlign: 'center', color: '#6b7280', marginTop: 40 },
 });

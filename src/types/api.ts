@@ -122,6 +122,13 @@ export interface StoreSettings {
   logoUrl?: string | null;
 }
 
+export interface FavoriteItem {
+  variantId: string;
+  product: string;
+  sku: string;
+  price: number;
+}
+
 export interface ShippingQuoteOption {
   method: string;
   price: number;

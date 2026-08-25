@@ -29,6 +29,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     setCustomer(null);
     queryClient.removeQueries({ queryKey: queryKeys.cart.all });
     queryClient.removeQueries({ queryKey: queryKeys.orders.all });
+    queryClient.removeQueries({ queryKey: queryKeys.favorites.all });
   }
 
   // RF-12: na abertura do app, repõe o token do SecureStore e valida com
