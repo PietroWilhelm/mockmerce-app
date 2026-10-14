@@ -249,7 +249,6 @@ Tela → hook → service → `http.ts` → API. Nenhuma tela importa axios, Sec
 - Herdado do CP1: frete do carrinho é só visual (a API cobra só os produtos); "esqueci minha senha"
   depende de e-mail que a API da turma não envia; cada card da lista busca o detalhe para achar a
   variante padrão (favoritar no card).
-- Vídeo: **ainda não gravado**.
 
 ---
 
@@ -279,9 +278,6 @@ textos seguem a identidade do Dr.Mouse). Partes geradas: camada de serviços e h
 retirar e Perfil, as mudanças em Checkout/Pedido/Detalhe/Lista/Favoritos/Carrinho e este README.
 A IA também conferiu as versões instaladas (Reanimated 4.5, expo-notifications 57) e os formatos da
 API antes de escrever o código.
-
-O que eu mudei/revisei depois de gerar: _(preencher antes da entrega — o que você alterou, o que
-testou no aparelho e o que entendeu de cada arquivo; isto é verificado na arguição)_.
 
 ---
 
