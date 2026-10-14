@@ -1,18 +1,11 @@
 import { createContext, useContext } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { getStoreSettings } from '@/services/store';
-import { queryKeys } from '@/lib/queryKeys';
+import { useStoreSettings } from '@/hooks/useStoreSettings';
 import { defaultTheme, type Theme } from './theme';
 
 const ThemeContext = createContext<Theme>(defaultTheme);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const { data } = useQuery({
-    queryKey: queryKeys.store.settings,
-    queryFn: getStoreSettings,
-    staleTime: 5 * 60 * 1000,
-    retry: false,
-  });
+  const { data } = useStoreSettings();
 
   const theme: Theme = {
     primary: data?.primaryColor || defaultTheme.primary,

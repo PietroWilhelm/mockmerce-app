@@ -30,6 +30,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     queryClient.removeQueries({ queryKey: queryKeys.cart.all });
     queryClient.removeQueries({ queryKey: queryKeys.orders.all });
     queryClient.removeQueries({ queryKey: queryKeys.favorites.all });
+    // can-review responde por QUEM está logado; não pode sobrar para o próximo.
+    queryClient.removeQueries({ queryKey: queryKeys.reviews.all });
   }
 
   // RF-12: na abertura do app, repõe o token do SecureStore e valida com

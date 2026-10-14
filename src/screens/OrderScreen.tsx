@@ -4,7 +4,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useOrder, useOrderTimeline } from '@/hooks/useOrders';
 import { useCancelOrder, usePayOrder } from '@/hooks/useOrderActions';
 import { Button, ErrorState, Loading } from '@/components/ui';
-import { money } from '@/lib/format';
+import { formatPickupAddress, money } from '@/lib/format';
 import { statusColor, statusLabel } from '@/lib/orders';
 import type { RootStackParamList } from '@/navigation';
 import type { ApiError, OrderTimelineEvent } from '@/types/api';
@@ -74,6 +74,22 @@ export function OrderScreen({ route }: Props) {
               </Text>
             </View>
           )}
+
+          {/* RF-47: o pedido criado reflete a escolha feita no checkout. */}
+          <View style={styles.paymentBox}>
+            <Text style={styles.sectionTitle}>Entrega</Text>
+            {order.pickup ? (
+              <>
+                <Text style={styles.pickupName}>Retirada em {order.pickup.name}</Text>
+                {formatPickupAddress(order.pickup.address) ? (
+                  <Text style={styles.variant}>{formatPickupAddress(order.pickup.address)}</Text>
+                ) : null}
+                {order.pickup.hours && <Text style={styles.variant}>{order.pickup.hours}</Text>}
+              </>
+            ) : (
+              <Text style={styles.pickupName}>Entrega no endereço</Text>
+            )}
+          </View>
 
           <Text style={styles.sectionTitle}>Itens</Text>
         </>
@@ -167,6 +183,7 @@ const styles = StyleSheet.create({
   orderId: { fontSize: 16, fontWeight: '700', color: '#111827' },
   status: { fontSize: 13, fontWeight: '700' },
   paymentBox: { gap: 4, marginBottom: 8 },
+  pickupName: { fontSize: 14, fontWeight: '600', color: '#111827' },
   sectionTitle: { fontSize: 13, fontWeight: '600', color: '#6b7280', marginTop: 8, marginBottom: 2 },
   row: {
     flexDirection: 'row',

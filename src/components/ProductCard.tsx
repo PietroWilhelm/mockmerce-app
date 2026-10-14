@@ -1,34 +1,34 @@
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import { money } from '@/lib/format';
 import { useTheme } from '@/theme/ThemeProvider';
+import { colors } from '@/theme/theme';
 import { useProduct } from '@/hooks/useProduct';
-import { useFavorites } from '@/hooks/useFavorites';
-import { useFavoriteMutations } from '@/hooks/useFavoriteMutations';
+import { useFavoriteToggle } from '@/hooks/useFavoriteToggle';
 import { useSession } from '@/session/session';
+import { PressableScale } from './motion/PressableScale';
+import { FavoriteButton } from './motion/FavoriteButton';
+import { formatRating } from './Stars';
 import type { ProductSummary } from '@/types/api';
 
 export function ProductCard({ product, onPress }: { product: ProductSummary; onPress: () => void }) {
   const theme = useTheme();
   const { isLoggedIn } = useSession();
-  const { data: favorites } = useFavorites();
   // Mesma query da tela de detalhe (queryKeys.products.detail) — cache compartilhado,
   // usada aqui só pra descobrir o id da variante padrão (a lista não traz variantId).
   const { data: detail } = useProduct(product.id);
-  const { addToFavorites, removeFromFavorites } = useFavoriteMutations();
+  const { isFavorite, toggle } = useFavoriteToggle();
 
   const defaultVariant = detail?.variants.find((v) => v.isDefault) ?? detail?.variants[0];
-  const isFavorited = !!defaultVariant && !!favorites?.some((f) => f.variantId === defaultVariant.id);
-  const favoritePending = addToFavorites.isPending || removeFromFavorites.isPending;
+  const isFavorited = isFavorite(defaultVariant?.id);
   const outOfStock = product.stock <= 0;
 
   function handleToggleFavorite() {
     if (!defaultVariant) return;
-    if (isFavorited) removeFromFavorites.mutate(defaultVariant.id);
-    else addToFavorites.mutate(defaultVariant.id);
+    toggle({ variantId: defaultVariant.id, product: product.name, sku: defaultVariant.sku, price: defaultVariant.price });
   }
 
   return (
-    <Pressable style={({ pressed }) => [styles.card, pressed && styles.cardPressed]} onPress={onPress}>
+    <PressableScale style={styles.card} onPress={onPress} accessibilityLabel={product.name}>
       <View style={styles.thumbWrap}>
         {product.image ? (
           <Image source={{ uri: product.image }} style={styles.thumb} />
@@ -41,14 +41,9 @@ export function ProductCard({ product, onPress }: { product: ProductSummary; onP
           </View>
         )}
         {isLoggedIn && (
-          <Pressable
-            hitSlop={10}
-            onPress={handleToggleFavorite}
-            disabled={!defaultVariant || favoritePending}
-            style={styles.starBtn}
-          >
-            <Text style={[styles.star, isFavorited && { color: theme.primary }]}>{isFavorited ? '★' : '☆'}</Text>
-          </Pressable>
+          <View style={styles.starBtn}>
+            <FavoriteButton active={isFavorited} onPress={handleToggleFavorite} disabled={!defaultVariant} size={16} />
+          </View>
         )}
       </View>
 
@@ -57,6 +52,17 @@ export function ProductCard({ product, onPress }: { product: ProductSummary; onP
           {product.name}
         </Text>
         {product.brand && <Text style={styles.brand}>{product.brand}</Text>}
+        {/* RF-35: a nota vem no próprio resumo do produto — nenhuma requisição a mais por card. */}
+        <Text style={styles.rating}>
+          {product.rating.count > 0 ? (
+            <>
+              <Text style={{ color: theme.primary }}>★ </Text>
+              {formatRating(product.rating.average)} ({product.rating.count})
+            </>
+          ) : (
+            'Sem avaliações'
+          )}
+        </Text>
         <View style={styles.priceRow}>
           <Text style={[styles.price, { color: theme.primary }]}>
             {product.priceFrom === product.priceTo
@@ -68,7 +74,7 @@ export function ProductCard({ product, onPress }: { product: ProductSummary; onP
           </Text>
         </View>
       </View>
-    </Pressable>
+    </PressableScale>
   );
 }
 
@@ -76,7 +82,7 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     gap: 12,
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 10,
     borderWidth: 1,
@@ -87,9 +93,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,
   },
-  cardPressed: { opacity: 0.85 },
   thumbWrap: { position: 'relative' },
-  thumb: { width: 84, height: 84, borderRadius: 12, backgroundColor: '#e5e7eb' },
+  thumb: { width: 84, height: 84, borderRadius: 12, backgroundColor: colors.border },
   thumbEmpty: { alignItems: 'center', justifyContent: 'center' },
   outOfStockBadge: {
     position: 'absolute',
@@ -109,7 +114,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -118,12 +123,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     elevation: 2,
   },
-  star: { fontSize: 16, color: '#d1d5db' },
   cardBody: { flex: 1, justifyContent: 'center', gap: 2 },
-  name: { fontSize: 15, fontWeight: '600', color: '#111827' },
-  brand: { fontSize: 12, color: '#6b7280' },
+  name: { fontSize: 15, fontWeight: '600', color: colors.text },
+  brand: { fontSize: 12, color: colors.textMuted },
+  rating: { fontSize: 12, color: colors.textMuted },
   priceRow: { flexDirection: 'row', alignItems: 'baseline', gap: 8, marginTop: 4, flexWrap: 'wrap' },
   price: { fontSize: 16, fontWeight: '800' },
-  stock: { fontSize: 12, color: '#6b7280' },
-  stockEmpty: { color: '#b45309' },
+  stock: { fontSize: 12, color: colors.textMuted },
+  stockEmpty: { color: colors.warning },
 });

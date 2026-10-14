@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCart } from '@/hooks/useCart';
 import { useCartMutations } from '@/hooks/useCartMutations';
@@ -8,6 +9,9 @@ import { useSession } from '@/session/session';
 import { useTheme } from '@/theme/ThemeProvider';
 import { money } from '@/lib/format';
 import { Button, ErrorState, Loading, TextField } from '@/components/ui';
+import { AnimatedListItem } from '@/components/motion/AnimatedListItem';
+import { PressableScale } from '@/components/motion/PressableScale';
+import { listItemLayout, useMotionMode } from '@/theme/motion';
 import type { RootStackParamList } from '@/navigation';
 import type { ApiError } from '@/types/api';
 
@@ -18,6 +22,7 @@ export function CartScreen({ navigation }: Props) {
   const { setQuantity, removeItem } = useCartMutations();
   const { customer, signOut } = useSession();
   const theme = useTheme();
+  const mode = useMotionMode();
   const [cep, setCep] = useState('');
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const shippingQuote = useShippingQuote();
@@ -37,8 +42,10 @@ export function CartScreen({ navigation }: Props) {
 
   return (
     <View style={styles.container}>
-      <FlatList
+      {/* RF-52: item removido sai animado; os outros se acomodam (célula com layout). */}
+      <Animated.FlatList
         data={items}
+        itemLayoutAnimation={listItemLayout(mode)}
         keyExtractor={(it) => it.variantId}
         contentContainerStyle={styles.list}
         ListHeaderComponent={
@@ -47,7 +54,7 @@ export function CartScreen({ navigation }: Props) {
           </Text>
         }
         renderItem={({ item }) => (
-          <View style={styles.row}>
+          <AnimatedListItem animateExit style={styles.row}>
             <View style={styles.info}>
               <Text style={styles.name} numberOfLines={2}>
                 {item.name}
@@ -57,25 +64,26 @@ export function CartScreen({ navigation }: Props) {
               </Text>
             </View>
             <View style={styles.qtyBox}>
-              {}
-              <Text
-                style={styles.qtyBtn}
+              <PressableScale
+                hitSlop={8}
+                accessibilityLabel="Diminuir quantidade"
                 onPress={() => setQuantity.mutate({ variantId: item.variantId, quantity: item.quantity - 1 })}
               >
-                −
-              </Text>
+                <Text style={styles.qtyBtn}>−</Text>
+              </PressableScale>
               <Text style={styles.qty}>{item.quantity}</Text>
-              <Text
-                style={styles.qtyBtn}
+              <PressableScale
+                hitSlop={8}
+                accessibilityLabel="Aumentar quantidade"
                 onPress={() => setQuantity.mutate({ variantId: item.variantId, quantity: item.quantity + 1 })}
               >
-                +
-              </Text>
+                <Text style={styles.qtyBtn}>+</Text>
+              </PressableScale>
             </View>
-            <Text style={styles.remove} onPress={() => removeItem.mutate(item.variantId)}>
-              remover
-            </Text>
-          </View>
+            <PressableScale hitSlop={8} onPress={() => removeItem.mutate(item.variantId)}>
+              <Text style={styles.remove}>remover</Text>
+            </PressableScale>
+          </AnimatedListItem>
         )}
         ListFooterComponent={
           items.length ? (
@@ -105,7 +113,7 @@ export function CartScreen({ navigation }: Props) {
                 {shippingQuote.data?.map((option) => {
                   const active = option.method === selectedMethod;
                   return (
-                    <Pressable
+                    <PressableScale
                       key={option.method}
                       onPress={() => setSelectedMethod(active ? null : option.method)}
                       style={[styles.shippingOption, active && { borderColor: theme.primary, borderWidth: 2 }]}
@@ -117,7 +125,7 @@ export function CartScreen({ navigation }: Props) {
                       <Text style={styles.shippingDetail}>
                         {money(option.price)} · {option.deadlineDays} dia(s)
                       </Text>
-                    </Pressable>
+                    </PressableScale>
                   );
                 })}
               </View>

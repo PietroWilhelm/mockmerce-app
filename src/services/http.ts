@@ -6,8 +6,11 @@ import { getToken, saveToken, clearToken } from './tokenStorage';
 export const http = axios.create({
   baseURL: `${env.apiUrl}/v1`,
   timeout: 15000,
+  // Sem 'Content-Type' fixo aqui: o axios já manda application/json sozinho
+  // quando o corpo é um objeto. Com o header fixo na instância, o axios
+  // CONVERTE um FormData em JSON e o POST /uploads chega sem arquivo; sem
+  // ele, o FormData sai como multipart e o React Native gera o boundary.
   headers: {
-    'Content-Type': 'application/json',
     'X-API-Key': env.apiKey,
     'X-Student-RM': env.studentRm,
   },

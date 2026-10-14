@@ -6,7 +6,8 @@ import type { Order } from '@/types/api';
 export function useCheckout() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: checkout,
+    // `undefined` = entrega; um id = retirada naquele ponto (RF-47).
+    mutationFn: (pickupPointId?: string) => checkout(pickupPointId),
     onSuccess: (order) => {
       queryClient.setQueryData<Order>(queryKeys.orders.detail(order.id), order);
       queryClient.invalidateQueries({ queryKey: queryKeys.orders.list() });
@@ -25,6 +26,9 @@ export function usePayOrder(id: string) {
       queryClient.setQueryData<Order>(queryKeys.orders.detail(id), order);
       queryClient.invalidateQueries({ queryKey: queryKeys.orders.timeline(id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.orders.list() });
+      // Pagar muda o "pode avaliar": antes era NOT_PURCHASED, agora libera.
+      // Sem isto, o botão de avaliar só apareceria depois de reabrir o app.
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.all });
     },
   });
 }

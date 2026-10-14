@@ -1,4 +1,5 @@
 import type { ListProductsParams } from '@/services/products';
+import type { Coordinate } from '@/types/api';
 
 export const queryKeys = {
   products: {
@@ -21,5 +22,21 @@ export const queryKeys = {
   },
   store: {
     settings: ['store', 'settings'] as const,
+  },
+  reviews: {
+    all: ['reviews'] as const,
+    list: (productId: string) => ['reviews', 'list', productId] as const,
+    // can-review depende de QUEM está logado: sai do cache no logout.
+    canReview: (productId: string) => ['reviews', 'can-review', productId] as const,
+  },
+  pickupPoints: {
+    all: ['pickup-points'] as const,
+    // A posição entra na chave: a lista "sem posição" e a "ordenada" são
+    // respostas diferentes e não podem dividir a mesma entrada de cache.
+    list: (position: Coordinate | null) =>
+      ['pickup-points', position?.latitude ?? null, position?.longitude ?? null] as const,
+  },
+  storeMessages: {
+    all: ['store-messages'] as const,
   },
 };

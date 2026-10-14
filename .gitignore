@@ -5,3 +5,9 @@ web-build/
 .env
 *.log
 .DS_Store
+.env.local
+expo-env.d.ts
+
+# Credenciais do Firebase (Caminho A) nunca vão para o Git.
+google-services.json
+GoogleService-Info.plist

@@ -1,11 +1,16 @@
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useFavoriteMutations } from '@/hooks/useFavoriteMutations';
 import { money } from '@/lib/format';
-import { Button, ErrorState, Loading } from '@/components/ui';
+import { Button, EmptyState, ErrorState, Loading } from '@/components/ui';
+import { AnimatedListItem } from '@/components/motion/AnimatedListItem';
+import { listItemLayout, useMotionMode } from '@/theme/motion';
+import { colors } from '@/theme/theme';
 import type { ApiError } from '@/types/api';
 
 export function FavoritesScreen() {
+  const mode = useMotionMode();
   const { data, isLoading, isError, error, refetch } = useFavorites();
   const { removeFromFavorites } = useFavoriteMutations();
 
@@ -14,19 +19,26 @@ export function FavoritesScreen() {
 
   const favorites = data ?? [];
 
+  if (favorites.length === 0) {
+    return (
+      <EmptyState
+        title="Nenhum favorito ainda"
+        message="Toque na estrela de um produto para guardar aqui."
+      />
+    );
+  }
+
   return (
-    <FlatList
+    // RF-52: remover é otimista, então o item sai na hora (animado) e os
+    // que ficam sobem com mola — `itemLayoutAnimation` move a CÉLULA da lista.
+    <Animated.FlatList
       style={styles.container}
       data={favorites}
       keyExtractor={(item) => item.variantId}
       contentContainerStyle={styles.list}
-      ListEmptyComponent={
-        <View style={styles.empty}>
-          <Text style={styles.emptyText}>Você ainda não favoritou nenhum produto.</Text>
-        </View>
-      }
+      itemLayoutAnimation={listItemLayout(mode)}
       renderItem={({ item }) => (
-        <View style={styles.card}>
+        <AnimatedListItem animateExit style={styles.card}>
           <View style={styles.cardBody}>
             <Text style={styles.name} numberOfLines={2}>
               {item.product}
@@ -34,34 +46,27 @@ export function FavoritesScreen() {
             <Text style={styles.sku}>{item.sku}</Text>
             <Text style={styles.price}>{money(item.price)}</Text>
           </View>
-          <Button
-            label="Remover"
-            variant="ghost"
-            onPress={() => removeFromFavorites.mutate(item.variantId)}
-            disabled={removeFromFavorites.isPending}
-          />
-        </View>
+          <Button label="Remover" variant="ghost" onPress={() => removeFromFavorites.mutate(item.variantId)} />
+        </AnimatedListItem>
       )}
     />
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: colors.surface },
   list: { padding: 12, gap: 10, flexGrow: 1 },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,
-    backgroundColor: '#f9fafb',
+    backgroundColor: colors.surfaceAlt,
     borderRadius: 12,
     padding: 12,
   },
   cardBody: { flex: 1, gap: 2 },
-  name: { fontSize: 15, fontWeight: '600', color: '#111827' },
-  sku: { fontSize: 12, color: '#6b7280' },
-  price: { fontSize: 15, fontWeight: '700', color: '#111827', marginTop: 2 },
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 80 },
-  emptyText: { color: '#6b7280', textAlign: 'center' },
+  name: { fontSize: 15, fontWeight: '600', color: colors.text },
+  sku: { fontSize: 12, color: colors.textMuted },
+  price: { fontSize: 15, fontWeight: '700', color: colors.text, marginTop: 2 },
 });

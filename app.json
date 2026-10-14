@@ -2,7 +2,7 @@
   "expo": {
     "name": "Dr.Mouse",
     "slug": "dr-mouse-app",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
@@ -10,10 +10,37 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "ios": { "supportsTablet": true },
-    "android": {
-      "adaptiveIcon": { "backgroundColor": "#ffffff" }
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "O Dr.Mouse usa sua localização só para mostrar os pontos de retirada mais perto de você.",
+        "NSPhotoLibraryUsageDescription": "O Dr.Mouse acessa suas fotos só quando você quer anexar uma imagem a uma avaliação."
+      }
     },
-    "web": { "bundler": "metro" }
+    "android": {
+      "adaptiveIcon": { "backgroundColor": "#ffffff" },
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION", "READ_MEDIA_IMAGES", "POST_NOTIFICATIONS"]
+    },
+    "web": { "bundler": "metro" },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "O Dr.Mouse usa sua localização só para mostrar os pontos de retirada mais perto de você."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O Dr.Mouse acessa suas fotos só quando você quer anexar uma imagem a uma avaliação."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#7e17d3"
+        }
+      ]
+    ]
   }
 }
